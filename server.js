@@ -5,20 +5,25 @@ const bodyParser = require('body-parser');
 const sgMail = require('@sendgrid/mail');
 
 const app = express();
-app.use(cors());
+
+// --- CORS ---
+app.use(cors({ origin: '*' }));
+app.options('*', cors());
+
+// --- Body parser ---
 app.use(bodyParser.json());
 
-// --- 1. SETUP SENDGRID ---
+// --- SENDGRID ---
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-// --- 2. MAIN API ROUTE ---
+// --- API ROUTE ---
 app.post('/send-message', async (req, res) => {
   const { name, email, contactNumber, message } = req.body;
 
   const msg = {
-    to: process.env.SENDGRID_EMAIL,      // Receive email (you)
-    from: process.env.SENDGRID_EMAIL,    // Verified sender
-    replyTo: email,                      // User email
+    to: process.env.SENDGRID_EMAIL,
+    from: process.env.SENDGRID_EMAIL,
+    replyTo: email,
     subject: `Portfolio: New Message from ${name}`,
     html: `
       <h3>New Message Received from Portfolio</h3>
@@ -35,21 +40,13 @@ app.post('/send-message', async (req, res) => {
     await sgMail.send(msg);
     console.log('Email sent via SendGrid');
 
-    res.status(200).json({
-      success: true,
-      message: 'Message sent successfully!',
-    });
+    res.status(200).json({ success: true, message: 'Message sent successfully!' });
   } catch (error) {
     console.error('SendGrid Error:', error.response?.body || error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to send the message.',
-    });
+    res.status(500).json({ success: false, message: 'Failed to send the message.' });
   }
 });
 
-// --- 3. START SERVER ---
+// --- START SERVER ---
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
