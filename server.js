@@ -6,9 +6,7 @@ const sgMail = require('@sendgrid/mail');
 
 const app = express();
 
-// --- CORS ---
-app.use(cors({ origin: '*' }));
-app.options('*', cors());
+app.use(cors());
 
 // --- Body parser ---
 app.use(bodyParser.json());
